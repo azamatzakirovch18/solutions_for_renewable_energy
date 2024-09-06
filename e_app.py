@@ -31,6 +31,7 @@ with st.sidebar:
 
     )
 
+
 # That's part of working pages
 if options == "Main Page":
     introduction()
