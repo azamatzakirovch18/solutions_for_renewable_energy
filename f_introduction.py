@@ -3,7 +3,8 @@ def introduction():
 
     # st.write("## Welcome to my project")
     st.write("## Renewable Energy")
-    st.write("""
+    st.write(
+        """
     This project is based on Global Renewable energy and includes 10 countries. There are 56 columns for representation.
     I divided then into 4 groups for analysing. They are :
     - Renewable Energy Data
@@ -25,6 +26,7 @@ def introduction():
     More information about US [@azamatzakirovch](https://www.instagram.com/azamatzakirovch)\n
     
     Tashkent 2024
-    """)
+    """
+    )
 
     # introduction part is finished

@@ -1,94 +1,108 @@
 def analysis():
     import streamlit as st
     from data_base import data
+    import matplotlib.pyplot as plt
 
+    flag = True
     df = data()
     with st.sidebar:
+        st.write("# Filters")
+        # st.write("_______________________")
         countries = st.selectbox(
             "Please choose a country you want to analyze",
-            options=['USA', "Russia", 'Australia', 'Canada', 'Japan', 'China', 'India', 'Germany',
-                     'France', 'Brazil']
+            options=[
+                "USA",
+                "Russia",
+                "Australia",
+                "Canada",
+                "Japan",
+                "China",
+                "India",
+                "Germany",
+                "France",
+                "Brazil",
+            ],
         )
 
         type_of_analyse = st.selectbox(
             "Method of analysis",
-            options=['Renewable Energy Data',
-                     "Socio-Economic Indicators",
-                     'Environmental Factors']
-
+            options=[
+                "Renewable Energy Data",
+                "Socio-Economic Indicators",
+                "Environmental Factors",
+                "Additional Features",
+            ],
         )
 
-
-    if type_of_analyse == 'Renewable Energy Data':
+    if type_of_analyse == "Renewable Energy Data":
         left, right = st.columns(2)
         # I need to select a year from 2000 to 2023 and i need to control user must not choose similar years like start == stop it is not possible
         with left:
             years = [i for i in range(2000, 2024)]
             start, stop = st.slider(
-                'Select a range of years',
+                "Select a range of years",
                 min_value=min(years),
                 max_value=max(years),
-                value=(min(years), max(years))  # Default to full range
+                value=(min(years), max(years)),  # Default to full range
             )
         # In dataset has column named Energy Type so it is very important
 
         with right:
             energy_types = st.multiselect(
                 "Select energy types",
-                options=[
-                    'Solar',
-                    'Geothermal',
-                    'Biomass',
-                    'Wind',
-                    'Hydro'
-                ],
-                default=['Solar']
+                options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                default=["Solar"],
             )
 
         # I should change the data set
 
         df = df[
-            (df['Country'] == countries) &
-            (df['Year'].between(start, stop)) &
-            (df['Energy Type'].isin(energy_types))
-            ]
+            (df["Country"] == countries)
+            & (df["Year"].between(start, stop))
+            & (df["Energy Type"].isin(energy_types))
+        ]
 
         if start == stop:
-            st.error('Years interval must be equal at least 1 year')
+            st.error("Years interval must be equal at least 1 year")
         else:
             left_producing, right_producing = st.columns(2)
             with left_producing:
-                df_for_renewable_energy_data = df[['Country', 'Year', 'Energy Type', 'Production (GWh)']]
+                df_for_renewable_energy_data = df[
+                    ["Country", "Year", "Energy Type", "Production (GWh)"]
+                ]
 
                 o = df_for_renewable_energy_data.pivot_table(
                     index="Year",
                     columns="Energy Type",
                     values="Production (GWh)",
-                    aggfunc="sum"
+                    # aggfunc="sum",
                 )
                 st.write("Production (GWh)")
                 st.line_chart(o)
 
             with right_producing:
-                df_for_renewable_energy_data = df[['Country', 'Year', 'Energy Type', 'Installed Capacity (MW)']]
+                df_for_renewable_energy_data = df[
+                    ["Country", "Year", "Energy Type", "Installed Capacity (MW)"]
+                ]
 
                 p = df_for_renewable_energy_data.pivot_table(
                     index="Year",
                     columns="Energy Type",
                     values="Installed Capacity (MW)",
-                    aggfunc="sum"
+                    # aggfunc="sum",
                 )
                 st.write("Installed Capacity (MW)")
                 st.line_chart(p)
 
-
-            df_for_investments = df[['Country', 'Year', 'Energy Type', 'Investments (USD)']]
+            df_for_investments = df[
+                ["Country", "Year", "Energy Type", "Investments (USD)"]
+            ]
 
             p = df_for_investments.pivot_table(
                 index="Year",
                 columns="Energy Type",
                 values="Investments (USD)",
-                aggfunc="sum"
+                # aggfunc="sum",
             )
             st.write("Investments (USD)")
             st.line_chart(p)
@@ -99,79 +113,312 @@ def analysis():
         with left:
             years = [i for i in range(2000, 2024)]
             start, stop = st.slider(
-                'Select a range of years',
+                "Select a range of years",
                 min_value=min(years),
                 max_value=max(years),
-                value=(min(years), max(years))  # Default to full range
+                value=(min(years), max(years)),  # Default to full range
             )
         # In dataset has column named Energy Type so it is very important
 
         with right:
             energy_types = st.selectbox(
                 "Select energy types",
-                options=[
-                    'Solar',
-                    'Geothermal',
-                    'Biomass',
-                    'Wind',
-                    'Hydro'
-                ],
-                index = 0
+                options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                index=0,
             )
 
         # I should change the data set
 
         df = df[
-            (df['Country'] == countries) &
-            (df['Year'].between(start, stop)) &
-            (df['Energy Type'] == (energy_types))
-            ]
+            (df["Country"] == countries)
+            & (df["Year"].between(start, stop))
+            & (df["Energy Type"] == (energy_types))
+        ]
 
         if start == stop:
-            st.error('Years interval must be equal at least 1 year')
+            st.error("Years interval must be equal at least 1 year")
         else:
 
-            primary,private = st.columns(2)
-
-
+            primary, private = st.columns(2)
 
             with primary:
-                st.write('## Primary Sector')
+                st.write("## Primary Sector")
 
-                df_primary = df[df['Government Policies'] == True]
-                df_primary = df_primary[['Country', 'Year', 'Energy Type', 'Energy Exports', "Energy Imports"]]
+                df_primary = df[df["Government Policies"] == True]
+                df_primary = df_primary[
+                    [
+                        "Country",
+                        "Year",
+                        "Energy Type",
+                        "Energy Exports",
+                        "Energy Imports",
+                    ]
+                ]
 
                 df_primary_pivot = df_primary.pivot_table(
                     index="Year",
                     values=["Energy Exports", "Energy Imports"],
-                    aggfunc="sum"
+                    # aggfunc="sum",
                 )
 
                 st.line_chart(df_primary_pivot)
 
             with private:
-                st.write('## Private Sector')
-                df_private = df[df['Government Policies'] == False]
-                df_private = df_private[['Country', 'Year', 'Energy Type', 'Energy Exports',"Energy Imports"]]
+                st.write("## Private Sector")
+                df_private = df[df["Government Policies"] == False]
+                df_private = df_private[
+                    [
+                        "Country",
+                        "Year",
+                        "Energy Type",
+                        "Energy Exports",
+                        "Energy Imports",
+                    ]
+                ]
 
                 df_private = df_private.pivot_table(
                     index="Year",
                     values=["Energy Exports", "Energy Imports"],
-                    aggfunc="sum"
+                    # aggfunc="sum",
                 )
 
                 st.line_chart(df_private)
 
-            df_main = df[['Country', 'Year', 'Energy Type',"Energy Consumption","CO2 Emissions","Renewable Energy Jobs"]]
+            df_main = df[
+                [
+                    "Country",
+                    "Year",
+                    "Energy Type",
+                    "Energy Consumption",
+                    "CO2 Emissions",
+                    "Renewable Energy Jobs",
+                ]
+            ]
             pivot_of_main = df_main.pivot_table(
                 index="Year",
-                values=["Energy Consumption","CO2 Emissions","Renewable Energy Jobs"],
-                aggfunc="sum"
+                values=["Energy Consumption", "CO2 Emissions", "Renewable Energy Jobs"],
+                # aggfunc="sum",
             )
-            st.write("Comparison between Energy Consumption,CO2 Emissions,Renewable Energy Jobs")
+            st.write(
+                "Comparison between Energy Consumption,CO2 Emissions,Renewable Energy Jobs"
+            )
             st.line_chart(pivot_of_main)
 
+    if type_of_analyse == "Environmental Factors":
+
+        on = st.toggle("Activate feature")
+
+        if on:
+            st.write("Feature activated!")
+
+    if type_of_analyse == "Additional Features":
+        # List of group names
+
+        groups = [
+            "Technical & Infrastructure Capacity",
+            "Economic & Financial Aspects",
+            "Innovation & Technology",
+            "Education & Awareness",
+            "Regulatory & Legal Framework",
+            "Environmental Factors",
+            "Social & Industrial Development",
+            "Policy & Program Initiatives",
+            "Research & Institutions",
+        ]
+
+        tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7, tab_8, tab_9 = st.tabs(groups)
+        with tab_1:
+            left, middle, right = st.columns(3)
+            # I need to select a year from 2000 to 2023 and i need to control user must not choose similar years like start == stop it is not possible
+            with left:
+                years = [i for i in range(2000, 2024)]
+                start, stop = st.slider(
+                    "Select a range of years",
+                    min_value=min(years),
+                    max_value=max(years),
+                    value=(min(years), max(years)),
+                )
+            # In dataset has column named Energy Type so it is very important
+
+            with middle:
+                liberalization = st.selectbox(
+                    "Select Your Liberation", ["Supported", "Unsupported", "Total"]
+                )
+
+            with right:
+                energy_types = st.multiselect(
+                    "Select energy types",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    default=["Solar"],
+                )
+
+            # I should change the data set
+
+            df = data()
+            df = df[
+                (df["Country"] == countries)
+                & (df["Year"].between(start, stop))
+                & (df["Energy Type"].isin(energy_types))
+            ]
+
+            if liberalization == 'Supported':
+                new_lib = df[df["Energy Market Liberalization"] == True]
+            elif liberalization == 'Unsupported':
+                new_lib = df[df["Energy Market Liberalization"] == False]
+            elif liberalization == 'Total':
+                new_lib = df[df["Energy Market Liberalization"] == True & df["Energy Type"].isin(energy_types)]
 
 
 
+            left_capacity, right_capacity = st.columns(2)
 
+            with left_capacity:
+                st.write("## Energy Storage Capacity & Liberalization")
+                tech_pivot = new_lib.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values="Energy Storage Capacity",
+                    # aggfunc="sum",
+                )
+
+                st.line_chart(tech_pivot)
+
+                liberalization_pivot = new_lib.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values="Grid Integration Capability",
+                    # aggfunc="sum",
+                )
+
+                st.bar_chart(liberalization_pivot)
+
+            with right_capacity:
+                st.write(f"## Energy Storage Capacity of {stop}")
+
+
+                filtered_df = new_lib
+
+                labels = energy_types  # List of energy types
+
+                # Group by 'Energy Type' and sum the 'Energy Storage Capacity'
+                share = filtered_df.groupby("Energy Type")[
+                    "Energy Storage Capacity"
+                ].sum()
+                share = share.reindex(
+                    labels, fill_value=0
+                )  # Ensuring the order matches labels
+
+                colors = [
+                    "#FF9999",
+                    "#66B2FF",
+                    "#99FF99",
+                    "#FFCC39",
+                    "#FF66CC",
+                ]  # Five custom colors
+
+                def absolute_value(val):
+                    total = sum(share)
+                    return f"{val:.2f}%\n({int(val * total / 100)} GWh)"
+
+                # Plot the pie chart
+                plt.figure()
+                plt.style.use("ggplot")
+                plt.pie(
+                    x=share,
+                    labels=labels,
+                    autopct=absolute_value,
+                    shadow=True,
+                    startangle=90,
+                    colors=colors,
+                )
+                plt.axis(
+                    "equal"
+                )  # Equal aspect ratio ensures the pie is drawn as a circle
+
+                # Add a white circle in the center for the donut effect
+                circle = plt.Circle((0, 0), 0.75, color="white")
+                plt.gca().add_artist(circle)
+
+                # Display the pie chart in Streamlit
+                st.pyplot(plt)
+
+                st.write(
+                    f"""
+                - Pie chart represents Energy Storage Capacity in {stop}. There are 5 different types of renewable
+                 energies. Total percentage is 100%. All measurments in GWh
+                - Linegraph represents Energy Storage Capacity between {start} and {stop} with 5 different types of renewable energies. 
+                - Bar chart represents Anti Monopoly for countries and graded from 1 to 10 between {start} and {stop} years and 5 different types of renewable energies. 
+                 
+                 """
+                )
+            with tab_2:
+                df_econ = data()
+                left_aspect, right_aspect = st.columns(2)
+
+                with left_aspect:
+                    years = [i for i in range(2000, 2024)]
+                    start_, stop_ = st.slider(
+                        "Select a range of years",
+                        min_value=min(years),
+                        max_value=max(years),
+                        value=(min(years), max(years)),
+                        key="year_range_slider"
+                    )
+
+                with right_aspect:
+                    energy_types = st.selectbox(
+                        "Select energy types",
+                        options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                        # default=["Solar"],
+                        index=0,
+                        key = energy_types
+                    )
+
+                df_econ = df_econ[
+                    (df_econ["Year"].between(start_, stop_))
+                    & (df_econ["Energy Type"] == (energy_types))
+                    & (df_econ["Country"] == countries)
+                ]
+
+                left_econ, right_econ = st.columns(2)
+
+                with left_econ:
+                    econ_pivot = df_econ.pivot_table(
+                        index="Year",
+                        columns="Energy Type",
+                        values="Electricity Prices",
+                        # aggfunc="sum",
+                    )
+                    st.write("## Electricity Prices")
+                    st.bar_chart(econ_pivot)
+
+
+                    subsidies = df_econ.pivot_table(
+                        index="Year",
+                        columns="Energy Type",
+                        values="Energy Subsidies"
+                    )
+
+                    st.write("## Energy Subsidies")
+
+                    st.line_chart(subsidies)
+
+
+                with right_econ:
+                    econ_pivot = df_econ.pivot_table(
+                        index = "Year",
+                        values = ["Export Incentives for Energy Equipment","Import Tariffs on Energy Equipment","Economic Freedom Index","Ease of Doing Business"],
+
+                    )
+                    st.write("## Graph of 4 columns")
+                    st.line_chart(econ_pivot)
+
+                    aid_pivot = df_econ.pivot_table(
+                        index = "Year",
+                        columns = "Energy Type",
+                        values = "International Aid for Renewables"
+                    )
+
+                    st.write("## International Aid for Renewables")
+
+                    st.line_chart(aid_pivot)

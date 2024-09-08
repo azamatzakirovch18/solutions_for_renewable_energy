@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import streamlit as st
+from streamlit_option_menu import option_menu
 
 # those are pages
 from f_introduction import introduction
@@ -16,19 +17,17 @@ from problems_and_solutions import problemsAndSolutions
 st.set_page_config(
     page_title="Global Renewable Dashboard",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # with this function I can create buttons for different pages
 with st.sidebar:
-    options = st.selectbox(
-        "please choose you oprion",
-        options=[
-            "Main Page",
-            "Analysis Page",
-            "Solutions Page"
-        ]
-
+    options = option_menu(
+        menu_title="Main Menu",  # Required
+        options=["Main Page", "Analysis Page", "Solutions Page"],
+        icons=["house", "bar-chart", "gear"],  # Optional (icons for each option)
+        menu_icon="cast",  # Optional (the icon for the whole menu)
+        default_index=0,  # Optional (set the default active item)
     )
 
 
