@@ -24,8 +24,8 @@ st.set_page_config(
 with st.sidebar:
     options = option_menu(
         menu_title="Main Menu",  # Required
-        options=["Main Page", "Analysis Page", "Solutions Page"],
-        icons=["house", "bar-chart", "gear"],  # Optional (icons for each option)
+        options=["Main Page", "Analysis Page"],
+        icons=["house", "bar-chart"],  # Optional (icons for each option)
         menu_icon="cast",  # Optional (the icon for the whole menu)
         default_index=0,  # Optional (set the default active item)
     )
@@ -36,5 +36,3 @@ if options == "Main Page":
     introduction()
 elif options == "Analysis Page":
     analysis()
-elif options == "Solutions Page":
-    problemsAndSolutions()

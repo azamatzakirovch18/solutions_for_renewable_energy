@@ -1,3 +1,6 @@
+from statsmodels.graphics import agreement
+
+
 def analysis():
     import streamlit as st
     from data_base import data
@@ -222,11 +225,9 @@ def analysis():
             "Regulatory & Legal Framework",
             "Environmental Factors",
             "Social & Industrial Development",
-            "Policy & Program Initiatives",
-            "Research & Institutions",
         ]
 
-        tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7, tab_8, tab_9 = st.tabs(groups)
+        tab_1, tab_2, tab_3, tab_4, tab_5, tab_6, tab_7 = st.tabs(groups)
         with tab_1:
             left, middle, right = st.columns(3)
             # I need to select a year from 2000 to 2023 and i need to control user must not choose similar years like start == stop it is not possible
@@ -261,14 +262,15 @@ def analysis():
                 & (df["Energy Type"].isin(energy_types))
             ]
 
-            if liberalization == 'Supported':
+            if liberalization == "Supported":
                 new_lib = df[df["Energy Market Liberalization"] == True]
-            elif liberalization == 'Unsupported':
+            elif liberalization == "Unsupported":
                 new_lib = df[df["Energy Market Liberalization"] == False]
-            elif liberalization == 'Total':
-                new_lib = df[df["Energy Market Liberalization"] == True & df["Energy Type"].isin(energy_types)]
-
-
+            elif liberalization == "Total":
+                new_lib = df[
+                    df["Energy Market Liberalization"]
+                    == True & df["Energy Type"].isin(energy_types)
+                ]
 
             left_capacity, right_capacity = st.columns(2)
 
@@ -294,7 +296,6 @@ def analysis():
 
             with right_capacity:
                 st.write(f"## Energy Storage Capacity of {stop}")
-
 
                 filtered_df = new_lib
 
@@ -351,74 +352,362 @@ def analysis():
                  
                  """
                 )
-            with tab_2:
-                df_econ = data()
-                left_aspect, right_aspect = st.columns(2)
+        with tab_2:
+            df_econ = data()
+            left_aspect, right_aspect = st.columns(2)
 
-                with left_aspect:
-                    years = [i for i in range(2000, 2024)]
-                    start_, stop_ = st.slider(
-                        "Select a range of years",
-                        min_value=min(years),
-                        max_value=max(years),
-                        value=(min(years), max(years)),
-                        key="year_range_slider"
-                    )
+            with left_aspect:
+                years = [i for i in range(2000, 2024)]
+                start_, stop_ = st.slider(
+                    "Select a range of years",
+                    min_value=min(years),
+                    max_value=max(years),
+                    value=(min(years), max(years)),
+                    key="year_range_slider",
+                )
 
-                with right_aspect:
-                    energy_types = st.selectbox(
-                        "Select energy types",
-                        options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
-                        # default=["Solar"],
-                        index=0,
-                        key = energy_types
-                    )
+            with right_aspect:
+                energy_types = st.selectbox(
+                    "Select energy types",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    # default=["Solar"],
+                    index=0,
+                    key=energy_types,
+                )
 
-                df_econ = df_econ[
-                    (df_econ["Year"].between(start_, stop_))
-                    & (df_econ["Energy Type"] == (energy_types))
-                    & (df_econ["Country"] == countries)
+            df_econ = df_econ[
+                (df_econ["Year"].between(start_, stop_))
+                & (df_econ["Energy Type"] == (energy_types))
+                & (df_econ["Country"] == countries)
+            ]
+
+            left_econ, right_econ = st.columns(2)
+
+            with left_econ:
+                econ_pivot = df_econ.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values="Electricity Prices",
+                    # aggfunc="sum",
+                )
+                st.write("## Electricity Prices")
+                st.bar_chart(econ_pivot)
+                # st.line_chart(econ_pivot)
+
+                subsidies = df_econ.pivot_table(
+                    index="Year", columns="Energy Type", values="Energy Subsidies"
+                )
+
+                st.write("## Energy Subsidies")
+
+                st.line_chart(subsidies)
+
+            with right_econ:
+                econ_pivot = df_econ.pivot_table(
+                    index="Year",
+                    values=[
+                        "Export Incentives for Energy Equipment",
+                        "Import Tariffs on Energy Equipment",
+                        "Economic Freedom Index",
+                        "Ease of Doing Business",
+                    ],
+                )
+                st.write("## Graph of 4 columns")
+                st.line_chart(econ_pivot)
+
+                aid_pivot = df_econ.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values="International Aid for Renewables",
+                )
+
+                st.write("## International Aid for Renewables")
+
+                st.line_chart(aid_pivot)
+
+        with tab_3:
+            inno_left, inno_middle, inno_right = st.columns(3)
+            inno_years = [i for i in range(2000, 2024)]
+            with inno_left:
+                inno_start, inno_end = st.slider(
+                    "Select a range of years",
+                    min_value=min(inno_years),
+                    max_value=max(inno_years),
+                    value=(min(inno_years), max(inno_years)),
+                    key="inno_years_range",
+                )
+            with inno_middle:
+                inno_agreement = st.selectbox(
+                    "Technology Transfer Agreements",
+                    options=["Agree", "Disagree", "Total"],
+                )
+
+            with inno_right:
+                inno_energy = st.selectbox(
+                    "Please choose your energy type you want !",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    index=0,
+                )
+
+            inno_df = data()
+            inno_df = inno_df[
+                inno_df["Year"].between(inno_start, inno_end)
+                & (inno_df["Energy Type"] == inno_energy)
+                & (inno_df["Country"] == countries)
+            ]
+
+            if inno_agreement == "Agree":
+                inno_df = inno_df[inno_df["Technology Transfer Agreements"] == True]
+            elif inno_agreement == "Disagree":
+                inno_df = inno_df[inno_df["Technology Transfer Agreements"] == False]
+
+            inno_left_g, inno_right_g = st.columns(2)
+            with inno_left_g:
+                inno_pivot = inno_df.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values="Renewable Energy Patents",
+                )
+
+                st.write("## Renewable Energy Patents")
+
+                st.bar_chart(inno_pivot)
+
+            with inno_right_g:
+                # Create pivot table
+                inno_pivot_2 = inno_df.pivot_table(
+                    index="Year",
+                    columns="Energy Type",
+                    values=["Local Manufacturing Capacity", "Innovation Index"],
+                )
+
+                # Flatten the MultiIndex columns
+                inno_pivot_2.columns = [
+                    " ".join(col).strip() for col in inno_pivot_2.columns.values
                 ]
 
-                left_econ, right_econ = st.columns(2)
+                st.write("## Local Manufacturing Capacity & Innovation Index")
+                st.line_chart(inno_pivot_2)
 
-                with left_econ:
-                    econ_pivot = df_econ.pivot_table(
-                        index="Year",
-                        columns="Energy Type",
-                        values="Electricity Prices",
-                        # aggfunc="sum",
-                    )
-                    st.write("## Electricity Prices")
-                    st.bar_chart(econ_pivot)
+        with tab_4:
+            st.write("## Education & Awareness")
+            edu_left, edu_middle, edu_right = st.columns(3)
 
+            with edu_left:
+                edu_years_Range = [i for i in range(2000, 2024)]
+                edu_start, edu_end = st.slider(
+                    "Select a range of years",
+                    min_value=min(edu_years_Range),
+                    max_value=max(edu_years_Range),
+                    value=(min(edu_years_Range), max(edu_years_Range)),
+                    key="edu_years_range",
+                )
 
-                    subsidies = df_econ.pivot_table(
-                        index="Year",
-                        columns="Energy Type",
-                        values="Energy Subsidies"
-                    )
+            with edu_middle:
+                edu_programs = st.selectbox(
+                    "Renewable Energy Education Programs",
+                    options=["Exist", "Unexist", "Total"],
+                )
 
-                    st.write("## Energy Subsidies")
+            with edu_right:
+                edu_energy_types = st.multiselect(
+                    "Please choose your energy type you want !",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    default=["Solar", "Geothermal"],
+                )
 
-                    st.line_chart(subsidies)
+            edu_df = data()
 
+            edu_df = edu_df[
+                (edu_df["Year"].between(edu_start, edu_end))
+                & (edu_df["Energy Type"].isin(edu_energy_types))
+                & (edu_df["Country"] == countries)
+            ]
 
-                with right_econ:
-                    econ_pivot = df_econ.pivot_table(
-                        index = "Year",
-                        values = ["Export Incentives for Energy Equipment","Import Tariffs on Energy Equipment","Economic Freedom Index","Ease of Doing Business"],
+            if edu_programs == "Exist":
+                edu_df = edu_df[edu_df["Renewable Energy Education Programs"] == True]
+            elif edu_programs == "Unexist":
+                edu_df = edu_df[edu_df["Renewable Energy Education Programs"] == False]
 
-                    )
-                    st.write("## Graph of 4 columns")
-                    st.line_chart(econ_pivot)
+            edu_df = edu_df[
+                [
+                    "Year",
+                    "Energy Type",
+                    "Country",
+                    "Public Awareness",
+                    "Educational Level",
+                ]
+            ]
 
-                    aid_pivot = df_econ.pivot_table(
-                        index = "Year",
-                        columns = "Energy Type",
-                        values = "International Aid for Renewables"
-                    )
+            edu_g_left, edu_g_right = st.columns(2)
 
-                    st.write("## International Aid for Renewables")
+            with edu_g_left:
+                st.write("## Public Awareness")
+                edu_g_left_pivot = edu_df.pivot_table(
+                    index="Year", columns="Energy Type", values="Public Awareness"
+                )
 
-                    st.line_chart(aid_pivot)
+                st.line_chart(edu_g_left_pivot)
+
+            with edu_g_right:
+                st.write("## Educational Level")
+                edu_g_right_pivot = edu_df.pivot_table(
+                    index="Year", columns="Energy Type", values="Educational Level"
+                )
+
+                st.bar_chart(edu_g_right_pivot)
+        with tab_5:
+            side_a = [
+                "Political Stability",
+                "Regulatory Quality",
+            ]
+            side_b = [
+                "Corruption Perception Index",
+                "Rule of Law",
+                "Control of Corruption",
+            ]
+
+            frame_df = data()
+
+            framework_left, framework_right = st.columns(2)
+
+            with framework_left:
+                frame_years = [i for i in range(2000, 2024)]
+                frame_s, frame_e = st.slider(
+                    "Please choose years range",
+                    min_value=min(frame_years),
+                    max_value=max(frame_years),
+                    value=(min(frame_years), max(frame_years)),
+                )
+
+            with framework_right:
+                frame_energies = st.selectbox(
+                    "Please choose energy type you want !",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    index=0,
+                )
+
+            frame_left, frame_right = st.columns(2)
+
+            with frame_left:
+                side_aa = frame_df[
+                    (frame_df["Year"].between(frame_s, frame_e))
+                    & (frame_df["Energy Type"] == frame_energies)
+                    & (frame_df["Country"] == countries)
+                ]
+                a_help = side_aa[
+                    [
+                        "Year",
+                        "Energy Type",
+                        "Country",
+                        "Political Stability",
+                        "Regulatory Quality",
+                    ]
+                ]
+                st.write("### About Politics")
+
+                frame_a_pivot = a_help.pivot_table(
+                    index="Year",
+                    # columns = "Energy Type",
+                    values=["Political Stability", "Regulatory Quality"],
+                )
+
+                st.line_chart(frame_a_pivot)
+
+            with frame_right:
+                st.write("### About Corruption")
+                side_aa = frame_df[
+                    (frame_df["Year"].between(frame_s, frame_e))
+                    & (frame_df["Energy Type"] == frame_energies)
+                    & (frame_df["Country"] == countries)
+                ]
+                a_help = side_aa[
+                    [
+                        "Year",
+                        "Energy Type",
+                        "Country",
+                        "Corruption Perception Index",
+                        "Rule of Law",
+                        "Control of Corruption",
+                    ]
+                ]
+
+                frame_a_pivot = a_help.pivot_table(
+                    index="Year",
+                    # columns = "Energy Type",
+                    values=[
+                        "Corruption Perception Index",
+                        "Rule of Law",
+                        "Control of Corruption",
+                    ],
+                )
+
+                st.line_chart(frame_a_pivot)
+        with tab_6:
+            nature_left, nature_middle, nature_right = st.columns(3)
+
+            with nature_left:
+                nature_years = [i for i in range(2000, 2024)]
+                nature_start, nature_end = st.slider(
+                    "Please choose years range",
+                    min_value=min(nature_years),
+                    max_value=max(nature_years),
+                    value=(min(nature_years), max(nature_years)),
+                    key="nature_years",
+                )
+            with nature_middle:
+                nature_disasters = st.selectbox(
+                    "Please choose disaster you want !",
+                    options=["Yes", "No", "Total"],
+                    index=0,
+                )
+
+            with nature_right:
+                nature_energy_types = st.multiselect(
+                    "Please choose your energy type you want !",
+                    options=["Solar", "Geothermal", "Biomass", "Wind", "Hydro"],
+                    default=["Solar", "Geothermal"],
+                    key="nature_energy_types",
+                )
+            nature_df = data()
+
+            if nature_disasters == "Yes":
+                nature_df = nature_df[
+                    (nature_df["Energy Type"].isin(nature_energy_types))
+                    & (nature_df["Country"] == countries)
+                    & (nature_df["Year"].between(nature_start, nature_end))
+                    & (nature_df["Natural Disasters"] == True)
+                ]
+            elif nature_disasters == "No":
+                nature_df = nature_df[
+                    (nature_df["Energy Type"].isin(nature_energy_types))
+                    & (nature_df["Country"] == countries)
+                    & (nature_df["Year"].between(nature_start, nature_end))
+                    & (nature_df["Natural Disasters"] == False)
+                ]
+            elif nature_disasters == "Total":
+                nature_df = nature_df[
+                    (nature_df["Energy Type"].isin(nature_energy_types))
+                    & (nature_df["Country"] == countries)
+                    & (nature_df["Year"].between(nature_start, nature_end))
+                ]
+            # Remove duplicates based on 'Year' and 'Energy Type'
+            nature_df = nature_df.drop_duplicates(subset=["Year", "Energy Type"])
+
+            st.write("Proportion of Energy from Renewables")
+            nature_df_pivot = nature_df.pivot(
+                index="Year",
+                columns="Energy Type",
+                values="Proportion of Energy from Renewables",
+            )
+
+            st.line_chart(nature_df_pivot)
+        with tab_7:
+            social_industrial_development = [
+                "Urbanization Rate",
+                "Industrialization Rate",
+                "Energy Sector Workforce",
+                "Public-Private Partnerships in Energy",
+            ]
+            dffff = data()
+            st.write(dffff[social_industrial_development])
