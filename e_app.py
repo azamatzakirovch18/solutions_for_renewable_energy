@@ -11,7 +11,6 @@ from streamlit_option_menu import option_menu
 # those are pages
 from f_introduction import introduction
 from g_analysis import analysis
-from problems_and_solutions import problemsAndSolutions
 
 # lets get started
 st.set_page_config(
